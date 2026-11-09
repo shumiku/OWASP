@@ -234,7 +234,33 @@ let requests=0,tokens=0;function updateRate(){ $('r10count').textContent=request
 function sendRateRequest(){if(requests>=3){showResult('r10result','<div class="result-head"><span class="status blocked">HTTP 429 · TOO MANY REQUESTS</span></div><div class="result-body">請求頻率或 Token 配額已達展示上限。\n系統已暫時拒絕後續請求。</div>');$('r10send').disabled=true;return}requests++;tokens+=1000;updateRate();showResult('r10result',`<div class="result-head"><span class="status safe">HTTP 200 · OK</span><span>請求 ${requests}</span></div><div class="result-body">模擬請求已通過速率限制。\nToken 使用量：${tokens} / 3000</div>`)}
 function resetRate(){requests=0;tokens=0;$('r10send').disabled=false;updateRate();showResult('r10result','<div class="result-body">測試已重設，等待請求。</div>')}
 renderReviews();updateRate();
-function askKnowledge(){let q=$('knowledgeQ').value.trim();if(!q)return;let ans='這是一個前端展示用的 RAG 回答。正式流程會先將問題轉為向量，從 PostgreSQL 知識庫檢索相關文件，再將檢索內容交給 TAIDE 生成回答。';if(/LLM01|提示詞注入/i.test(q))ans='LLM01 提示詞注入是指攻擊者透過輸入內容影響模型遵循的指令，使模型偏離原本任務或違反預期規則。防禦可結合輸入檢測、指令與資料隔離、工具權限控管，以及輸出驗證。';else if(/資料外洩|個資|敏感/i.test(q))ans='資料外洩防禦可從資料最小化、個資辨識與遮罩、存取權限控管、傳輸與儲存加密、日誌去識別化等面向著手。也應避免將不必要的敏感資料送入模型。';showResult('knowledgeResult',`<div class="result-head"><span class="status safe">檢索完成（模擬）</span><span>TAIDE + RAG</span></div><div class="result-body">${ans}\n\n參考來源（示意）：OWASP Top 10 for LLM Applications\n處理狀態：前端模擬，尚未連接實際向量資料庫。</div>`)}
-</script>
+async function askKnowledge(){
+  let q=$('knowledgeQ').value.trim();
+  if(!q)return;
+  
+  // 1. 顯示等待狀態
+  showResult('knowledgeResult', '<div class="result-head"><span class="status warn">處理中</span><span>TAIDE API</span></div><div class="result-body">正在連線至本地 FastAPI 後端，請稍候...</div>');
+  
+  try {
+    // 2. 呼叫 1.py 的後端 API
+    let res = await fetch('http://127.0.0.1:8000/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: q })
+    });
+    
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    
+    // 3. 解析後端回傳的 JSON (包含 reply 與 filtered_input)
+    let data = await res.json();
+    
+    // 4. 將 TAIDE 產生的真實結果渲染到畫面上
+    showResult('knowledgeResult', `<div class="result-head"><span class="status safe">生成完成</span><span>TAIDE + FastAPI</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
+    
+  } catch (e) {
+    // 錯誤處理：未啟動後端或連線失敗的提示
+    showResult('knowledgeResult', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已透過 uvicorn 啟動於 http://127.0.0.1:8000<br>錯誤訊息：${e.message}</div>`);
+  }
+}</script>
 </body>
 </html>
