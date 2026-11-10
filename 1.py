@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import ollama
-
 app = FastAPI()
 
 # 【重要設定】允許前端網頁連線 (CORS)，否則會被瀏覽器擋下
@@ -26,7 +25,7 @@ def chat_with_ai(req: ChatRequest):
     # 呼叫 TAIDE 模型，並加入「系統提示詞」限制其行為
     # 注意：這裡的 model 名稱請確認是你最後成功下載的那個版本
     response = ollama.chat(
-        model='tetf/Llama-3.1-TAIDE-LX-8B-Chat-GGUF', 
+        model='cwchang/llama3-taide-lx-8b-chat-alpha1:latest', 
         messages=[
             {
                 'role': 'system',
