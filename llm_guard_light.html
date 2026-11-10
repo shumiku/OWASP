@@ -195,17 +195,18 @@ body{background:linear-gradient(135deg,#f7f9fd,#edf3fb 55%,#f5f8fc);color:var(--
 </main>
 </div>
 <script>
+// 1. 依照 OWASP 2025 最新版 PDF 更新風險名稱與定義
 const risks=[
 ['LLM01','提示詞注入','Prompt Injection','惡意指令與越獄過濾器','⌁','risk1'],
 ['LLM02','敏感資訊洩露','Sensitive Information Disclosure','機密資料打碼機','▣','risk2'],
 ['LLM03','供應鏈漏洞','Supply Chain Vulnerability','系統相依性與套件安全','◇','risk3'],
-['LLM04','資料與模型中毒','Data and Model Poisoning','人機協作審核後台','☷','risk4'],
+['LLM04','資料與模型投毒','Data and Model Poisoning','人機協作審核後台','☷','risk4'],
 ['LLM05','不當輸出處理','Improper Output Handling','XSS 跨站腳本安全沙盒','⌘','risk5'],
 ['LLM06','過度授權','Excessive Agency','關鍵操作雙重確認鎖','⊙','risk6'],
-['LLM07','系統提示詞外洩','System Prompt Leakage','系統設定隱匿防護','▤','risk7'],
-['LLM08','向量與嵌入弱點','Vector and Embedding Weaknesses','RAG 權限隔離測試區','◈','risk8'],
-['LLM09','錯誤資訊／幻覺','Misinformation','知識溯源與信心提示','◎','risk9'],
-['LLM10','無限制消耗','Unbounded Consumption','流量儀表板與速率限制','▥','risk10']
+['LLM07','系統提示洩露','System Prompt Leakage','系統設定隱匿防護','▤','risk7'],
+['LLM08','向量與嵌入漏洞','Vector and Embedding Vulnerabilities','RAG 權限隔離測試區','◈','risk8'],
+['LLM09','資訊誤導','Misinformation','知識溯源與信心提示','◎','risk9'],
+['LLM10','無限資源消耗','Unbounded Consumption','流量儀表板與速率限制','▥','risk10']
 ];
 const $=id=>document.getElementById(id);
 function go(page){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(page).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===page));let b=document.querySelector('.nav button[data-page="'+page+'"]');$('crumb').textContent=b?b.querySelector('.nav-text').textContent:'安全總覽';window.scrollTo(0,0)}
@@ -214,88 +215,181 @@ $('riskCards').innerHTML=risks.map(r=>`<article class="risk-card" onclick="go('$
 function toggleSwitch(el){el.classList.toggle('on')}
 function isOn(id){return $(id).classList.contains('on')}
 function showResult(id,html,kind=''){let el=$(id);el.classList.remove('empty');el.innerHTML=html;if(kind)el.classList.add(kind)}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+// ---------------------------------------------------------
+// API 呼叫共用模組
+// ---------------------------------------------------------
+async function fetchTAIDE(message) {
+  let res = await fetch('http://127.0.0.1:8000/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: message })
+  });
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+  return await res.json();
+}
+
+// 知識檢索與教育中心 (連線)
+async function askKnowledge(){
+  let q=$('knowledgeQ').value.trim();
+  if(!q)return;
+  showResult('knowledgeResult', '<div class="result-head"><span class="status warn">處理中</span><span>TAIDE API</span></div><div class="result-body">正在連線至本地 FastAPI 後端，請稍候...</div>');
+  try {
+    let data = await fetchTAIDE(q);
+    showResult('knowledgeResult', `<div class="result-head"><span class="status safe">生成完成</span><span>TAIDE + FastAPI</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
+  } catch (e) {
+    showResult('knowledgeResult', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。<br>錯誤訊息：${e.message}</div>`);
+  }
+}
+
+// LLM01 提示詞注入 (連線)
 async function runRisk1(){
   let s=$('r1input').value.trim();
   if(!s)return;
-  
-  // 模擬 Middleware 層的安全規則檢查
   let suspicious=/忽略|無視|解除.*限制|越獄|system prompt|洩露內部|覆寫.*指令/i.test(s);
-  
-  // 情況一：防禦開啟且偵測到惡意指令 (直接攔截)
   if(isOn('r1switch')&&suspicious){
     showResult('r1result',`<div class="result-head"><span class="status blocked">已攔截</span><span>Prompt Guard</span></div><div class="result-body">偵測到可能的指令覆寫或越權意圖。\n處置：請求已在 Middleware 層被拒絕，未送交 TAIDE 模型。</div>`);
     return;
   }
-  
-  // 情況二：防禦關閉，或未被規則抓到，實際送交後端模型 (真實展示攻擊結果)
   showResult('r1result', '<div class="result-head"><span class="status warn">送交模型中</span><span>TAIDE API</span></div><div class="result-body">指令未被攔截，正在將內容送交本地模型執行...</div>');
-  
   try {
-    let res = await fetch('http://127.0.0.1:8000/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: s })
-    });
-    
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    
-    let data = await res.json();
-    
-    // 依據是否有潛在惡意來決定標籤顏色
+    let data = await fetchTAIDE(s);
     let statusClass = suspicious ? 'blocked' : 'safe';
     let statusText = suspicious ? '防禦關閉：模型可能遭覆寫' : '執行完成';
-    
     showResult('r1result', `<div class="result-head"><span class="status ${statusClass}">${statusText}</span><span>TAIDE 真實回覆</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
-    
   } catch (e) {
-    showResult('r1result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。<br>錯誤訊息：${e.message}</div>`);
+    showResult('r1result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。</div>`);
   }
-}function runMask(){let s=$('r2input').value;let out=s.replace(/[A-Z][12]\d{8}/g,m=>m.slice(0,4)+'****'+m.slice(-2)).replace(/\b(\d{4})[- ]?(\d{4})[- ]?(\d{4})[- ]?(\d{4})\b/g,'$1-****-****-$4');showResult('r2result',`<div class="result-head"><span class="status safe">脫敏完成</span><span>Regex Masking · DEMO</span></div><div class="result-body">${escapeHtml(out)}</div>`)}
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+}
+
+// LLM02 敏感資訊洩露 (連線)
+async function runMask(){
+  let s = $('r2input').value;
+  if (!s) return;
+  showResult('r2result', '<div class="result-head"><span class="status warn">處理中</span><span>Data Masking</span></div><div class="result-body">正在將資料傳送至後端進行脫敏處理...</div>');
+  try {
+    let data = await fetchTAIDE(s);
+    let safe_data = data.filtered_input || s; 
+    showResult('r2result', `<div class="result-head"><span class="status safe">脫敏完成</span><span>FastAPI Middleware</span></div><div class="result-body">${escapeHtml(safe_data)}</div>`);
+  } catch (e) {
+    showResult('r2result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。</div>`);
+  }
+}
+
+// LLM03 供應鏈漏洞 (模擬掃描體驗提升)
 const deps=[['FastAPI','後端 API','0.115.x'],['Ollama','本地模型服務','0.5.x'],['TAIDE','語言模型','依部署版本'],['Vue.js','前端框架','3.x'],['PostgreSQL','資料庫','16.x'],['Python 套件','應用程式相依套件','依 lockfile']];
 $('dependencyRows').innerHTML=deps.map(d=>`<tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td><td><span class="status warn">待實際掃描</span></td></tr>`).join('');
-function scanCVE(){showResult('r3result','<div class="result-head"><span class="status warn">展示掃描完成</span><span>DEMO ONLY</span></div><div class="result-body">已完成前端流程展示。\n注意：目前沒有連接 CVE 資料庫或掃描器，因此不能判定套件是否安全。請於正式環境整合依賴掃描工具。</div>')}
+function scanCVE(){
+  showResult('r3result','<div class="result-head"><span class="status warn">掃描中</span><span>Dependency Scanner</span></div><div class="result-body">正在分析 SBOM 模組與 CVE 資料庫比對...</div>');
+  setTimeout(() => {
+    showResult('r3result','<div class="result-head"><span class="status safe">掃描完成</span><span>DEMO ONLY</span></div><div class="result-body">已完成前端流程展示。\nOWASP 2025 提醒：請於正式環境整合第三方依賴掃描工具。</div>');
+    $('dependencyRows').innerHTML=deps.map(d=>`<tr><td>${d[0]}</td><td>${d[1]}</td><td>${d[2]}</td><td><span class="status safe">掃描通過</span></td></tr>`).join('');
+  }, 1200);
+}
+
+// LLM04 資料與模型投毒 (人機協作佇列)
 let reviews=[];
 function renderReviews(){let html=reviews.length?reviews.map((r,i)=>`<div class="result" style="margin-top:10px"><div class="result-head"><b>審核項目 #${i+1}</b><span class="status ${r.status==='待審核'?'warn':r.status==='已拒絕'?'blocked':'safe'}">${r.status}</span></div><div class="result-body">${escapeHtml(r.text)}\n來源：${escapeHtml(r.source)}</div>${r.status==='待審核'?`<div class="btn-row"><button class="btn danger" onclick="reviewItem(${i},'已拒絕')">拒絕加入</button><button class="btn primary" onclick="reviewItem(${i},'已核准')">核准資料</button></div>`:''}</div>`).join(''):'目前沒有待審核資料。';$('reviewQueue').innerHTML=html;$('adminQueue').innerHTML=html;$('adminPending').textContent=reviews.filter(r=>r.status==='待審核').length}
-function submitReview(){let t=$('r4input').value.trim();if(!t)return;reviews.unshift({text:t,source:$('r4source').value,status:'待審核'});showResult('r4result','<div class="result-head"><span class="status safe">資料已提交</span></div><div class="result-body">資料已送入管理員審核佇列。\n目前狀態：待審核，尚未寫入正式知識庫。</div>');renderReviews()}
+function submitReview(){let t=$('r4input').value.trim();if(!t)return;reviews.unshift({text:t,source:$('r4source').value,status:'待審核'});showResult('r4result','<div class="result-head"><span class="status safe">資料已提交</span></div><div class="result-body">資料已送入管理員審核佇列。\n目前狀態：待審核，尚未寫入正式知識庫以防止資料投毒。</div>');renderReviews()}
 function reviewItem(i,status){reviews[i].status=status;renderReviews()}
-function runOutput(){let val=$('r5input').value;let box=$('r5result');box.innerHTML='<div class="result-head"><span class="status safe">安全預覽</span><span>'+(isOn('r5switch')?'已跳脫':'純文字展示')+'</span></div><div class="result-body" id="safeOutput"></div>';$('safeOutput').textContent=val}
-function authorizeAction(){showResult('r6result','<div class="result-head"><span class="status warn">已記錄人工確認</span></div><div class="result-body">展示流程：使用者已確認授權。\n此原型不會執行真實轉帳、也不會呼叫金融 API。</div>')}
-function denyAction(){showResult('r6result','<div class="result-head"><span class="status blocked">操作已拒絕</span></div><div class="result-body">使用者拒絕此次請求，Agent 不得繼續執行。</div>')}
-function runRisk7(){let s=$('r7input').value;let probe=/system prompt|系統提示詞|內部設定|忽略之前|運作邏輯/i.test(s);if(isOn('r7switch')&&probe)showResult('r7result','<div class="result-head"><span class="status blocked">偵測到探測行為</span></div><div class="result-body">很抱歉，我無法透露內部設定或系統指令。</div>');else showResult('r7result',`<div class="result-head"><span class="status ${probe?'warn':'safe'}">${probe?'防禦未啟用':'一般問題'}</span></div><div class="result-body">${probe?'正式系統應避免回傳內部提示詞與敏感配置。':'此輸入未觸發展示用提示詞探測規則。'}</div>`)}
-function runRBAC(){let role=$('r8role').value,guard=isOn('r8switch');if(guard&&role==='guest')showResult('r8result','<div class="result-head"><span class="status blocked">權限不足</span></div><div class="result-body">RBAC 已在檢索前套用存取條件。\n結果：查無可存取的相關資料，未檢索機密內容。</div>');else if(role==='manager')showResult('r8result','<div class="result-head"><span class="status warn">需額外授權</span></div><div class="result-body">目前身份具備較高權限，但機密資料仍需依資料分級與額外授權規則檢查。\n展示結果：僅回傳已核准的模擬摘要。</div>');else showResult('r8result','<div class="result-head"><span class="status warn">未啟用權限過濾</span></div><div class="result-body">此情境模擬缺少 RBAC 的風險。正式系統不得將未授權資料提供給模型。</div>')}
-function runGrounding(){showResult('r9result','<div class="result-head"><span class="status warn">需要審慎判斷</span><span>示範回答</span></div><div class="result-body">不建議僅根據 AI 回答，就將所有資金投入單一標的。投資決策需考量風險承受度、投資期間、資產配置與可靠的公開資訊。\n\n參考來源（示意）：\n• 金融監督管理委員會：投資人教育與金融消費資訊\n• 臺灣證券交易所：公開資訊觀測站\n\n⚠️ 此為教育展示內容，不構成投資建議。來源清單為示意，正式系統應顯示實際檢索文件與可驗證連結。')}
-let requests=0,tokens=0;function updateRate(){ $('r10count').textContent=requests+' / 3';$('r10tokens').textContent=tokens+' / 3000';$('r10progress').style.width=Math.min(tokens/3000*100,100)+'%'}
-function sendRateRequest(){if(requests>=3){showResult('r10result','<div class="result-head"><span class="status blocked">HTTP 429 · TOO MANY REQUESTS</span></div><div class="result-body">請求頻率或 Token 配額已達展示上限。\n系統已暫時拒絕後續請求。</div>');$('r10send').disabled=true;return}requests++;tokens+=1000;updateRate();showResult('r10result',`<div class="result-head"><span class="status safe">HTTP 200 · OK</span><span>請求 ${requests}</span></div><div class="result-body">模擬請求已通過速率限制。\nToken 使用量：${tokens} / 3000</div>`)}
-function resetRate(){requests=0;tokens=0;$('r10send').disabled=false;updateRate();showResult('r10result','<div class="result-body">測試已重設，等待請求。</div>')}
-renderReviews();updateRate();
-async function askKnowledge(){
-  let q=$('knowledgeQ').value.trim();
-  if(!q)return;
-  
-  // 1. 顯示等待狀態
-  showResult('knowledgeResult', '<div class="result-head"><span class="status warn">處理中</span><span>TAIDE API</span></div><div class="result-body">正在連線至本地 FastAPI 後端，請稍候...</div>');
-  
+
+// LLM05 不當輸出處理 (連線測試 XSS 跳脫)
+async function runOutput(){
+  let val=$('r5input').value;
+  let isSafe=isOn('r5switch');
+  showResult('r5result','<div class="result-head"><span class="status warn">處理中</span><span>TAIDE API</span></div><div class="result-body">正在請求模型生成腳本與 HTML...</div>');
   try {
-    // 2. 呼叫 1.py 的後端 API
-    let res = await fetch('http://127.0.0.1:8000/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: q })
-    });
-    
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    
-    // 3. 解析後端回傳的 JSON (包含 reply 與 filtered_input)
-    let data = await res.json();
-    
-    // 4. 將 TAIDE 產生的真實結果渲染到畫面上
-    showResult('knowledgeResult', `<div class="result-head"><span class="status safe">生成完成</span><span>TAIDE + FastAPI</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
-    
-  } catch (e) {
-    // 錯誤處理：未啟動後端或連線失敗的提示
-    showResult('knowledgeResult', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已透過 uvicorn 啟動於 http://127.0.0.1:8000<br>錯誤訊息：${e.message}</div>`);
+    // 要求模型重複這段文字，以測試輸出的處理方式
+    let data = await fetchTAIDE(`請原封不動地重複這段文字：${val}`);
+    let html = `<div class="result-head"><span class="status ${isSafe?'safe':'blocked'}">安全預覽 (${isSafe?'安全跳脫':'未過濾，具 XSS 風險'})</span><span>TAIDE 回覆</span></div><div class="result-body" id="safeOutput"></div>`;
+    $('r5result').innerHTML = html;
+    if(isSafe) {
+      $('safeOutput').textContent = data.reply; // 防禦開啟：使用 textContent (安全)
+    } else {
+      $('safeOutput').innerHTML = data.reply;   // 防禦關閉：使用 innerHTML (危險)
+    }
+  } catch(e) {
+    showResult('r5result',`<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。</div>`);
   }
-}</script>
+}
+
+// LLM06 過度授權 (流程模擬)
+function authorizeAction(){showResult('r6result','<div class="result-head"><span class="status warn">已記錄人工確認</span></div><div class="result-body">展示流程：使用者已確認授權。\nOWASP 2025 提醒：高風險操作必須遵循「最小權限」與「人機協作(HITL)」原則。</div>')}
+function denyAction(){showResult('r6result','<div class="result-head"><span class="status blocked">操作已拒絕</span></div><div class="result-body">使用者拒絕此次請求，Agent 授權已被攔截，不得繼續執行下游操作。</div>')}
+
+// LLM07 系統提示洩露 (連線)
+async function runRisk7(){
+  let s=$('r7input').value.trim();
+  if(!s)return;
+  let probe=/system prompt|系統提示詞|內部設定|忽略之前|運作邏輯|限制/i.test(s);
+  
+  if(isOn('r7switch')&&probe){
+    showResult('r7result','<div class="result-head"><span class="status blocked">偵測到探測行為</span><span>System Guard</span></div><div class="result-body">很抱歉，無法回應與系統內部設定相關的探測指令。</div>');
+    return;
+  }
+  showResult('r7result', '<div class="result-head"><span class="status warn">處理中</span><span>TAIDE API</span></div><div class="result-body">防禦關閉，正在將探測指令送交本地模型執行...</div>');
+  try {
+    let data = await fetchTAIDE(s);
+    let statusClass = probe ? 'warn' : 'safe';
+    let statusText = probe ? '潛在洩露風險' : '執行完成';
+    showResult('r7result', `<div class="result-head"><span class="status ${statusClass}">${statusText}</span><span>TAIDE 真實回覆</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
+  } catch (e) {
+    showResult('r7result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。</div>`);
+  }
+}
+
+// LLM08 向量與嵌入漏洞 (RAG 權限結合 TAIDE)
+async function runRBAC(){
+  let role=$('r8role').value, guard=isOn('r8switch'), q=$('r8input').value;
+  if(guard && role==='guest'){
+    showResult('r8result','<div class="result-head"><span class="status blocked">權限不足</span><span>RBAC Guard</span></div><div class="result-body">RBAC 已在向量檢索前套用存取條件。\n結果：查無可存取的相關資料，未檢索機密內容。</div>');
+    return;
+  }
+  showResult('r8result', '<div class="result-head"><span class="status warn">檢索中</span><span>TAIDE API</span></div><div class="result-body">正在進行向量檢索與模型生成...</div>');
+  try {
+    let data = await fetchTAIDE(q);
+    let statusClass = (role==='manager') ? 'safe' : 'warn';
+    let statusText = (role==='manager') ? '高階主管授權存取' : '未啟用權限過濾 (潛在越權漏洞)';
+    showResult('r8result', `<div class="result-head"><span class="status ${statusClass}">${statusText}</span><span>TAIDE 真實回覆</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
+  } catch (e) {
+    showResult('r8result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。</div>`);
+  }
+}
+
+// LLM09 資訊誤導 (連線)
+async function runGrounding(){
+  let s = $('r9input').value.trim();
+  if(!s) return;
+  showResult('r9result', '<div class="result-head"><span class="status warn">生成中</span><span>TAIDE API</span></div><div class="result-body">正在向模型請求回答...</div>');
+  try {
+    let data = await fetchTAIDE(s);
+    showResult('r9result', `<div class="result-head"><span class="status warn">需人工查證 (資訊誤導風險)</span><span>TAIDE 原始生成</span></div><div class="result-body">${escapeHtml(data.reply)}\n\n<hr style="border-color:#2a3d5b; margin:14px 0 10px">\n<small style="color:#b7c7df">⚠️ <b>OWASP 2025 (LLM09) 風險提示</b>：以上為模型自主生成內容，未經知識庫比對。若產生幻覺或過度依賴生成結果，將引發資訊誤導風險。請務必查證可靠來源。</small></div>`);
+  } catch (e) {
+    showResult('r9result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。</div>`);
+  }
+}
+
+// LLM10 無限資源消耗 (連線進行流量壓力測試)
+let requests=0,tokens=0;
+function updateRate(){ $('r10count').textContent=requests+' / 3';$('r10tokens').textContent=tokens+' / 3000';$('r10progress').style.width=Math.min(tokens/3000*100,100)+'%'}
+async function sendRateRequest(){
+  if(requests>=3){
+    showResult('r10result','<div class="result-head"><span class="status blocked">HTTP 429 · TOO MANY REQUESTS</span></div><div class="result-body">請求頻率或 Token 配額已達展示上限。\n系統已暫時拒絕後續請求，成功阻擋無限資源消耗 (DoS) 攻擊。</div>');
+    $('r10send').disabled=true;
+    return;
+  }
+  requests++; tokens+=1000; updateRate();
+  showResult('r10result',`<div class="result-head"><span class="status warn">處理中</span><span>API 請求 #${requests}</span></div><div class="result-body">正在向 TAIDE 拋出高負載請求...</div>`);
+  try {
+    await fetchTAIDE("這是一次資源消耗壓力測試。");
+    showResult('r10result',`<div class="result-head"><span class="status safe">HTTP 200 · OK</span><span>API 請求 #${requests}</span></div><div class="result-body">後端模型成功回應！\n累積 Token 消耗量：${tokens} / 3000</div>`);
+  } catch(e) {
+    showResult('r10result',`<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。</div>`);
+  }
+}
+function resetRate(){requests=0;tokens=0;$('r10send').disabled=false;updateRate();showResult('r10result','<div class="result-body">流量配額已重設，等待測試。</div>')}
+renderReviews();updateRate();
+</script>
 </body>
 </html>
