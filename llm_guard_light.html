@@ -221,7 +221,8 @@ function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 // API 呼叫共用模組
 // ---------------------------------------------------------
 async function fetchTAIDE(message) {
-  let res = await fetch('http://127.0.0.1:8000/api/chat', {
+  // 把這裡的 127.0.0.1 換成你的 Render 網址，並保留後面的 /api/chat
+  let res = await fetch('https://owasp-llm.onrender.com/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: message })
