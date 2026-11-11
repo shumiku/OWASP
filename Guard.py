@@ -19,7 +19,7 @@ class ChatRequest(BaseModel):
 
 # 初始化 Groq 客戶端 (請換成你申請的 API Key)
 client = Groq(
-    api_key=os.environ.get("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"),
+    api_key=os.environ.get("GROQ_API_KEY"),
 )
 
 @app.post("/api/chat")
