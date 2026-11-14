@@ -134,9 +134,112 @@ body{background:linear-gradient(135deg,#f7f9fd,#edf3fb 55%,#f5f8fc);color:var(--
 </section>
 
 <section class="page" id="risk2">
-  <div class="hero"><div><div class="eyebrow">RISK MODULE / LLM02</div><h1>敏感資訊洩露防禦</h1><p>Sensitive Information Disclosure · 在資料送往模型前識別並遮罩個人敏感資訊。</p></div><div class="hero-tag">DATA PRIVACY</div></div>
-  <div class="module-layout"><div class="panel module-panel"><h3>機密資料打碼機</h3><p class="muted">輸入測試資料，觀察身分證與信用卡號遮罩結果。請勿輸入真實個資。</p><label class="field-label">待脫敏文字</label><textarea id="r2input">我的身分證是 A123456789，信用卡號 4311-8765-4321-1234。</textarea><div class="btn-row"><button class="btn primary" onclick="runMask()">送出並脫敏</button><button class="btn ghost" onclick="document.getElementById('r2input').value='聯絡電話 0912345678，身分證 B123456789。'">載入測試資料</button></div><div class="result empty" id="r2result">等待脫敏處理</div></div>
-  <div class="panel module-panel"><h3>資料保護狀態</h3><div class="kv"><div><small>身分證辨識</small><b style="color:var(--green)">已啟用</b></div><div><small>信用卡辨識</small><b style="color:var(--green)">已啟用</b></div><div><small>處理位置</small><b>模型呼叫前</b></div><div><small>處理方式</small><b>遮罩／替換</b></div></div><div class="notice">此為前端示範規則。正式系統應使用經測試的資料辨識流程，並搭配日誌去識別化、加密與資料最小化。</div></div></div>
+  <style>
+    @keyframes r2spin{100%{transform:rotate(360deg)}}
+    @keyframes r2in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @media (prefers-reduced-motion:reduce){#risk2 *{animation:none!important}}
+    #risk2 .r2-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:12px}
+    #risk2 .r2-seg button{border:0;background:transparent;color:var(--muted);padding:8px 14px;font-size:11px}
+    #risk2 .r2-seg button+button{border-left:1px solid var(--line)}
+    #risk2 .r2-seg button.active{background:rgba(22,140,164,.12);color:var(--cyan);font-weight:700}
+    #risk2 .r2-modedesc{font-size:11px;color:var(--muted);margin:8px 0 12px;line-height:1.7}
+    #risk2 .r2-history{flex:1;min-height:320px;max-height:600px;overflow-y:auto;background:rgba(100,116,139,.06);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:16px;margin-bottom:14px}
+    #risk2 .r2-empty{text-align:center;color:var(--muted);font-size:11px;margin:auto;line-height:1.9}
+    #risk2 .r2-turn{display:flex;flex-direction:column;gap:10px;padding-bottom:16px;border-bottom:1px dashed var(--line);animation:r2in .25s ease}
+    #risk2 .r2-turn:last-child{border-bottom:0;padding-bottom:0}
+    #risk2 .r2-user{align-self:flex-end;max-width:88%;padding:10px 14px;border-radius:14px 14px 0 14px;background:linear-gradient(110deg,#248fa8,#527bd5);color:#fff;font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+    #risk2 .r2-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11px;line-height:1.7;color:var(--text);animation:r2in .25s ease}
+    #risk2 .r2-card h4{margin:0 0 8px;font-size:11px;color:var(--muted);font-weight:600}
+    #risk2 .r2-card.red{border-left:4px solid var(--red);background:rgba(217,76,103,.06)}
+    #risk2 .r2-card.green{border-left:4px solid var(--green);background:rgba(21,150,108,.06)}
+    #risk2 .r2-card.amber{border-left:4px solid var(--amber);background:rgba(183,121,31,.08)}
+    #risk2 .r2-steps{display:grid;gap:7px}
+    #risk2 .r2-step{display:grid;grid-template-columns:18px 118px 1fr;gap:8px;align-items:center;color:var(--muted)}
+    #risk2 .r2-step small{font-size:10px;color:var(--muted);overflow-wrap:anywhere}
+    #risk2 .r2-ico{width:16px;height:16px;display:grid;place-items:center;font-style:normal;font-size:12px}
+    #risk2 .r2-step .r2-ico:before{content:"○"}
+    #risk2 .r2-step.s-run{color:var(--text)}
+    #risk2 .r2-step.s-run .r2-ico{animation:r2spin 1s linear infinite;color:var(--cyan)}
+    #risk2 .r2-step.s-run .r2-ico:before{content:"⟳"}
+    #risk2 .r2-step.s-ok{color:var(--text)}#risk2 .r2-step.s-ok .r2-ico{color:var(--green)}#risk2 .r2-step.s-ok .r2-ico:before{content:"✓"}
+    #risk2 .r2-step.s-warn{color:var(--text)}#risk2 .r2-step.s-warn .r2-ico{color:var(--amber)}#risk2 .r2-step.s-warn .r2-ico:before{content:"!"}
+    #risk2 .r2-step.s-bad{color:var(--text)}#risk2 .r2-step.s-bad .r2-ico{color:var(--red)}#risk2 .r2-step.s-bad .r2-ico:before{content:"✕"}
+    #risk2 .r2-step.s-skip .r2-ico:before{content:"–"}
+    #risk2 .r2-code{padding:9px 11px;background:rgba(22,140,164,.07);border:1px solid rgba(22,140,164,.2);border-radius:7px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+    #risk2 .r2-mark{background:color-mix(in srgb,var(--c) 18%,transparent);border-bottom:2px solid var(--c);border-radius:3px;padding:0 2px;color:inherit}
+    #risk2 .r2-bot{align-self:flex-start;max-width:88%;padding:12px 16px;border-radius:14px 14px 14px 0;background:var(--panel);border:1px solid var(--line);font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+    #risk2 .r2-bot .r2-who{font-size:10px;color:var(--cyan);font-weight:700;margin-bottom:6px}
+    #risk2 .r2-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle}
+    #risk2 .r2-tblwrap{overflow-x:auto}
+    #risk2 .r2-tbl td,#risk2 .r2-tbl th{white-space:nowrap}
+    #risk2 .r2-tbl code{font-size:10px;color:var(--muted)}
+    #risk2 .r2-add{display:flex;gap:8px}
+    #risk2 .r2-add input{flex:1;min-width:0}
+    #risk2 .r2-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:16px;background:rgba(21,150,108,.1);color:#15966c;font-size:11px;margin:3px 4px 3px 0}
+    #risk2 .r2-chip button{border:0;background:transparent;color:inherit;font-size:14px;line-height:1;padding:0 4px}
+    #risk2 .r2-sub{font-size:13px;margin:22px 0 7px}
+    #risk2 .r2-msg{font-size:10px;color:var(--red);min-height:14px;margin-top:6px}
+  </style>
+  <div class="hero">
+    <div>
+      <div class="eyebrow">RISK MODULE / LLM02</div>
+      <h1>敏感資訊洩露防禦</h1>
+      <p>Sensitive Information Disclosure · 在資料送往模型前識別並遮罩個人敏感資訊。</p>
+    </div>
+    <div class="hero-tag">DATA PRIVACY</div>
+  </div>
+
+  <div class="module-layout">
+    <div class="panel module-panel" style="display:flex; flex-direction:column;">
+      <h3>機密資料打碼機（互動測試）</h3>
+      <p class="muted">輸入任何文字並送出，可以逐步看到 LLM Guard 如何檢測、標示、處置，再把結果交給模型。模型的回覆也會再檢查一次。</p>
+
+      <div class="r2-seg" id="r2seg" role="group" aria-label="處置模式">
+        <button data-mode="mask" onclick="r2SetMode('mask')">遮罩</button>
+        <button data-mode="block" onclick="r2SetMode('block')">攔截</button>
+        <button data-mode="detect" onclick="r2SetMode('detect')">僅偵測</button>
+      </div>
+      <div class="r2-modedesc" id="r2modedesc"></div>
+
+      <div id="r2history" class="r2-history" aria-live="polite">
+        <div class="r2-empty" id="r2empty">系統已準備就緒，請在下方輸入測試訊息開始對話。<br>也可以先到右側新增你自己想保護的文字。</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <textarea id="r2input" placeholder="請輸入包含身分證、信用卡、電話、地址等敏感資訊的文字…（Ctrl + Enter 送出）" style="min-height:75px; resize:vertical;" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();runMaskInteractive()}"></textarea>
+        <div class="btn-row" style="margin-top:0">
+          <button class="btn primary" id="r2send" onclick="runMaskInteractive()">送出對話 ↗</button>
+          <button class="btn ghost" onclick="document.getElementById('r2input').value='幫我查詢訂單，我的身分證是 A123456789，信用卡號 4311-8765-4321-1234。'">載入個資範例</button>
+          <button class="btn ghost" onclick="document.getElementById('r2input').value='請說明什麼是敏感資訊洩露，以及企業可以怎麼預防？'">正常問題範例</button>
+          <button class="btn ghost" onclick="r2Clear()">清除對話</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel module-panel">
+      <h3>偵測器設定</h3>
+      <p class="muted">關閉某個偵測器後，再送出同一段文字，看看會發生什麼事。</p>
+      <div id="r2detectors"></div>
+
+      <h3 class="r2-sub">自訂敏感文字</h3>
+      <p class="muted">新增你想保護的文字（例如專案代號、客戶名稱、人名），它會和內建偵測器一起檢查輸入與輸出。</p>
+      <div class="r2-add" style="margin-top:12px">
+        <input class="text-input" id="r2custom" maxlength="40" placeholder="例如：Project-Phoenix" onkeydown="if(event.key==='Enter'){event.preventDefault();r2AddCustom()}">
+        <button class="btn primary" onclick="r2AddCustom()">新增</button>
+      </div>
+      <div class="r2-msg" id="r2addmsg"></div>
+      <div id="r2chips"></div>
+
+      <h3 class="r2-sub">資料保護狀態</h3>
+      <div class="kv">
+        <div><small>已啟用偵測器</small><b id="r2kvDet" style="color:var(--green)"></b></div>
+        <div><small>自訂敏感文字</small><b id="r2kvCustom"></b></div>
+        <div><small>處理位置</small><b>模型呼叫前後</b></div>
+        <div><small>處理方式</small><b id="r2kvMode"></b></div>
+      </div>
+      <div class="notice">此為前端示範規則。正式系統應使用經測試的資料辨識流程，並搭配日誌去識別化、加密與資料最小化。</div>
+    </div>
+  </div>
 </section>
 
 <section class="page" id="risk3">
@@ -264,19 +367,209 @@ async function runRisk1(){
   }
 }
 
-// LLM02 敏感資訊洩露 (連線)
-async function runMask(){
-  let s = $('r2input').value;
-  if (!s) return;
-  showResult('r2result', '<div class="result-head"><span class="status warn">處理中</span><span>Data Masking</span></div><div class="result-body">正在將資料傳送至後端進行脫敏處理...</div>');
-  try {
-    let data = await fetchTAIDE(s);
-    let safe_data = data.filtered_input || s; 
-    showResult('r2result', `<div class="result-head"><span class="status safe">脫敏完成</span><span>FastAPI Middleware</span></div><div class="result-body">${escapeHtml(safe_data)}</div>`);
-  } catch (e) {
-    showResult('r2result', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。</div>`);
+// LLM02 敏感資訊洩露 (連線 - 仿 Lakera Guard：逐步偵測流程 + 使用者自訂文字)
+function r2Luhn(s){let d=s.replace(/\D/g,'');if(d.length<13||d.length>19)return false;let sum=0,alt=false;for(let i=d.length-1;i>=0;i--){let n=+d[i];if(alt){n*=2;if(n>9)n-=9}sum+=n;alt=!alt}return sum%10===0}
+function r2CheckTWID(s){const map={A:10,B:11,C:12,D:13,E:14,F:15,G:16,H:17,I:34,J:18,K:19,L:20,M:21,N:22,O:35,P:23,Q:24,R:25,S:26,T:27,U:28,V:29,W:32,X:30,Y:31,Z:33};let c=map[s[0].toUpperCase()];if(!c)return false;let n=[Math.floor(c/10),c%10,...s.slice(1).split('').map(Number)];const w=[1,9,8,7,6,5,4,3,2,1,1];return n.reduce((a,v,i)=>a+v*w[i],0)%10===0}
+
+const R2_DET=[
+  {id:'tw_id',name:'身分證字號',type:'pii/tw_national_id',token:'[身分證字號]',color:'#d94c67',on:true,re:()=>/\b[A-Za-z][12]\d{8}\b/g,level:m=>r2CheckTWID(m)?1:3},
+  {id:'credit',name:'信用卡號',type:'pii/credit_card',token:'[信用卡號]',color:'#c77d1a',on:true,re:()=>/\b(?:\d[ -]?){12,18}\d\b/g,level:m=>r2Luhn(m)?1:3},
+  {id:'phone',name:'手機號碼',type:'pii/phone_number',token:'[手機號碼]',color:'#2b7bd6',on:true,re:()=>/\b09\d{2}[- ]?\d{3}[- ]?\d{3}\b/g,level:()=>2},
+  {id:'email',name:'電子郵件',type:'pii/email',token:'[電子郵件]',color:'#7a56d6',on:true,re:()=>/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,level:()=>1},
+  {id:'address',name:'住家地址',type:'pii/address',token:'[地址]',color:'#168ca4',on:true,re:()=>/[\u4e00-\u9fa5]{2}[縣市][\u4e00-\u9fa5]{1,4}[區鄉鎮市][\u4e00-\u9fa5\d]{1,12}?(?:路|街|大道)(?:[\u4e00-\u9fa5\d]{0,3}段)?(?:\d+巷)?(?:\d+弄)?(?:\d+號)?(?:之?\d+)?(?:\d+樓)?/g,level:()=>3},
+  {id:'secret',name:'密碼／API 金鑰',type:'secret/credential',token:'[機密憑證]',color:'#b83280',on:true,re:()=>/(?:sk-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16}|(?:密碼|password|passwd|pwd)\s*[:：=是為]?\s*[^\s，。,;；]+)/gi,level:()=>2}
+];
+const R2_CUSTOM={id:'custom',name:'自訂敏感文字',type:'custom/user_text',token:'[自訂敏感詞]',color:'#15966c'};
+const R2_LV={1:'L1 極高',2:'L2 高',3:'L3 中'};
+const R2_MODES={
+  mask:{label:'遮罩',desc:'遮罩 Mask：偵測到敏感資訊時，先以標籤取代，再把安全內容送交模型（建議做法）。'},
+  block:{label:'攔截',desc:'攔截 Block：只要偵測到敏感資訊，整筆請求直接拒絕，不送交模型。'},
+  detect:{label:'僅偵測',desc:'僅偵測 Detect：只標示偵測結果、不做任何處置，原始資料會直接送進模型。用來示範沒有防護時的洩露風險。'}
+};
+let r2Custom=[],r2Mode='mask',r2Busy=false;
+const r2sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+// 掃描文字：回傳 findings（位置）與 rows（每個偵測器的結果）
+function r2Scan(text){
+  const raw=[];
+  R2_DET.forEach(d=>{
+    if(!d.on)return;
+    let re=d.re(),m;
+    while((m=re.exec(text))!==null){
+      if(!m[0].length){re.lastIndex++;continue}
+      raw.push({start:m.index,end:m.index+m[0].length,text:m[0],det:d,level:d.level(m[0])});
+    }
+  });
+  r2Custom.forEach(w=>{
+    let re=new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m;
+    while((m=re.exec(text))!==null){
+      if(!m[0].length){re.lastIndex++;continue}
+      raw.push({start:m.index,end:m.index+m[0].length,text:m[0],det:R2_CUSTOM,level:1});
+    }
+  });
+  raw.sort((a,b)=>a.start-b.start||(b.end-b.start)-(a.end-a.start));
+  const findings=[];let last=0;
+  raw.forEach(f=>{if(f.start>=last){findings.push(f);last=f.end}});
+  const rows=R2_DET.map(d=>{
+    if(!d.on)return{name:d.name,type:d.type,color:d.color,state:'off'};
+    let hs=findings.filter(f=>f.det===d);
+    return{name:d.name,type:d.type,color:d.color,state:hs.length?'hit':'clear',hits:hs.length,level:hs.length?Math.min(...hs.map(h=>h.level)):0};
+  });
+  if(r2Custom.length){
+    let hs=findings.filter(f=>f.det===R2_CUSTOM);
+    rows.push({name:'自訂敏感文字（'+r2Custom.length+'）',type:R2_CUSTOM.type,color:R2_CUSTOM.color,state:hs.length?'hit':'clear',hits:hs.length,level:hs.length?1:0});
+  }
+  return{findings,rows};
+}
+function r2Mask(text,findings){let out='',p=0;findings.forEach(f=>{out+=text.slice(p,f.start)+f.det.token;p=f.end});return out+text.slice(p)}
+function r2Highlight(text,findings){let out='',p=0;findings.forEach(f=>{out+=escapeHtml(text.slice(p,f.start))+`<mark class="r2-mark" style="--c:${f.det.color}" title="${escapeHtml(f.det.type)}">${escapeHtml(f.text)}</mark>`;p=f.end});return out+escapeHtml(text.slice(p))}
+function r2Table(rows){
+  return `<div class="r2-tblwrap"><table class="table r2-tbl"><thead><tr><th>偵測器</th><th>類型</th><th>結果</th><th>信心</th></tr></thead><tbody>`+
+  rows.map(r=>`<tr><td><i class="r2-dot" style="background:${r.color}"></i>${r.name}</td><td><code>${r.type}</code></td><td>${r.state==='hit'?`<span class="status blocked">偵測到 ×${r.hits}</span>`:r.state==='clear'?`<span class="status safe">未偵測</span>`:`<span class="chip">已停用</span>`}</td><td>${r.state==='hit'?R2_LV[r.level]:'—'}</td></tr>`).join('')+
+  `</tbody></table></div>`;
+}
+
+// 每筆對話的流程步驟
+const R2_STEPS=['接收輸入','輸入檢測','處置','送交模型','輸出檢測','回覆使用者'];
+function r2Step(turn,n,state,detail){
+  let el=turn.querySelector(`.r2-step[data-s="${n}"]`);
+  el.className='r2-step s-'+state;
+  if(detail!==undefined)el.querySelector('small').textContent=detail;
+}
+function r2Add(turn,html){turn.querySelector('.r2-body').insertAdjacentHTML('beforeend',html)}
+
+async function runMaskInteractive(){
+  if(r2Busy)return;
+  const inputEl=$('r2input');
+  const s=inputEl.value.trim();
+  if(!s)return;
+  r2Busy=true;$('r2send').disabled=true;
+
+  const history=$('r2history');
+  const empty=$('r2empty');if(empty)empty.classList.add('hidden');
+  const id='r2t'+Date.now();
+  history.insertAdjacentHTML('beforeend',`
+    <div class="r2-turn" id="${id}">
+      <div class="r2-user">${escapeHtml(s)}</div>
+      <div class="r2-card"><h4>LLM Guard 處理流程</h4><div class="r2-steps">${R2_STEPS.map((t,i)=>`<div class="r2-step s-pending" data-s="${i+1}"><i class="r2-ico"></i><span>${t}</span><small></small></div>`).join('')}</div></div>
+      <div class="r2-body" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>`);
+  inputEl.value='';
+  const turn=$(id);
+  const scroll=()=>{history.scrollTop=history.scrollHeight};
+  scroll();
+
+  try{
+    // 1. 接收輸入
+    r2Step(turn,1,'run');await r2sleep(250);
+    r2Step(turn,1,'ok',s.length+' 字元');
+
+    // 2. 輸入檢測
+    r2Step(turn,2,'run');await r2sleep(650);
+    const scan=r2Scan(s);
+    const n=scan.findings.length;
+    r2Step(turn,2,n?'warn':'ok',n?`偵測到 ${n} 筆敏感資訊`:'未發現敏感資訊');
+    r2Add(turn,`<div class="r2-card"><h4>偵測結果（逐一偵測器）</h4>${r2Table(scan.rows)}</div>`);
+    if(n)r2Add(turn,`<div class="r2-card"><h4>原文標示（顏色對應偵測器）</h4><div class="r2-code">${r2Highlight(s,scan.findings)}</div></div>`);
+    scroll();
+
+    // 3. 處置
+    await r2sleep(450);
+    r2Step(turn,3,'run');await r2sleep(450);
+    let payload=s;
+    if(!n){
+      r2Step(turn,3,'ok','無需處置，原文放行');
+    }else if(r2Mode==='mask'){
+      payload=r2Mask(s,scan.findings);
+      r2Step(turn,3,'ok',`已遮罩 ${n} 筆`);
+      r2Add(turn,`<div class="r2-card green"><h4>安全內容（實際傳給模型的內容）</h4><div class="r2-code">${escapeHtml(payload)}</div></div>`);
+    }else if(r2Mode==='block'){
+      r2Step(turn,3,'bad','整筆請求已攔截');
+      [4,5,6].forEach(k=>r2Step(turn,k,'skip','已略過'));
+      r2Add(turn,`<div class="r2-card red"><h4>請求已被攔截</h4>偵測到 ${n} 筆敏感資訊，依「攔截」模式拒絕整筆請求，<b>未送交模型</b>。請移除敏感內容後再試一次，或切換到「遮罩」模式。</div>`);
+      scroll();return;
+    }else{
+      r2Step(turn,3,'warn','僅偵測，未處置');
+      r2Add(turn,`<div class="r2-card amber"><h4>未防護</h4>目前為「僅偵測」模式，上面標示的 ${n} 筆敏感資訊會<b>原封不動送進模型</b>。</div>`);
+    }
+    scroll();
+
+    // 4. 送交模型
+    await r2sleep(300);
+    r2Step(turn,4,'run');
+    let data;
+    try{
+      data=await fetchTAIDE(payload);
+    }catch(e){
+      r2Step(turn,4,'bad','連線失敗');
+      [5,6].forEach(k=>r2Step(turn,k,'skip','已略過'));
+      r2Add(turn,`<div class="r2-card red"><h4>無法連線至後端 API</h4>請確認 FastAPI (1.py) 已啟動。<br>錯誤資訊：${escapeHtml(e.message)}</div>`);
+      scroll();return;
+    }
+    let reply=data.reply||'（模型無文字回應）';
+    r2Step(turn,4,'ok','TAIDE 已回應');
+    if(data.filtered_input&&data.filtered_input!==payload){
+      r2Add(turn,`<div class="r2-card"><h4>後端中介層另外處理過輸入</h4><div class="r2-code">${escapeHtml(data.filtered_input)}</div></div>`);
+    }
+    scroll();
+
+    // 5. 輸出檢測（模型的回覆也要檢查）
+    await r2sleep(350);
+    r2Step(turn,5,'run');await r2sleep(500);
+    const outScan=r2Scan(reply);
+    const m=outScan.findings.length;
+    let shown=escapeHtml(reply).replace(/\n/g,'<br>');
+    if(!m){
+      r2Step(turn,5,'ok','回覆未含敏感資訊');
+    }else if(r2Mode==='mask'){
+      r2Step(turn,5,'warn',`回覆含 ${m} 筆敏感資訊，已遮罩`);
+      shown=escapeHtml(r2Mask(reply,outScan.findings)).replace(/\n/g,'<br>');
+    }else if(r2Mode==='block'){
+      r2Step(turn,5,'bad',`回覆含 ${m} 筆敏感資訊，已攔截`);
+      shown='<i>此回覆含有敏感資訊，已被輸出檢測攔截。</i>';
+    }else{
+      r2Step(turn,5,'warn',`回覆含 ${m} 筆敏感資訊（未處置）`);
+      shown=r2Highlight(reply,outScan.findings).replace(/\n/g,'<br>');
+    }
+
+    // 6. 回覆
+    r2Step(turn,6,'run');await r2sleep(250);
+    r2Step(turn,6,'ok','已顯示');
+    r2Add(turn,`<div class="r2-bot"><div class="r2-who">TAIDE 模型回應</div>${shown}</div>`);
+    scroll();
+  }finally{
+    r2Busy=false;$('r2send').disabled=false;scroll();
   }
 }
+
+// 右側：偵測器開關、自訂文字、狀態
+function r2RenderSide(){
+  $('r2detectors').innerHTML=R2_DET.map(d=>`<div class="toggle-line"><span><i class="r2-dot" style="background:${d.color}"></i>${d.name}</span><button class="switch${d.on?' on':''}" onclick="r2ToggleDet('${d.id}')" aria-label="切換 ${d.name}"></button></div>`).join('');
+  $('r2chips').innerHTML=r2Custom.length?r2Custom.map((w,i)=>`<span class="r2-chip">${escapeHtml(w)}<button onclick="r2DelCustom(${i})" aria-label="移除 ${escapeHtml(w)}">×</button></span>`).join(''):'<span class="muted">尚未新增自訂文字</span>';
+  let on=R2_DET.filter(d=>d.on).length;
+  $('r2kvDet').textContent=on+' / '+R2_DET.length;
+  $('r2kvCustom').textContent=r2Custom.length+' 筆';
+  $('r2kvMode').textContent=R2_MODES[r2Mode].label;
+  $('r2modedesc').textContent=R2_MODES[r2Mode].desc;
+  document.querySelectorAll('#r2seg button').forEach(b=>b.classList.toggle('active',b.dataset.mode===r2Mode));
+}
+function r2SetMode(m){r2Mode=m;r2RenderSide()}
+function r2ToggleDet(id){let d=R2_DET.find(x=>x.id===id);if(d){d.on=!d.on;r2RenderSide()}}
+function r2AddCustom(){
+  let el=$('r2custom'),w=el.value.trim(),msg=$('r2addmsg');
+  msg.textContent='';
+  if(!w)return;
+  if(w.length<2){msg.textContent='至少輸入 2 個字，避免誤遮罩太多內容。';return}
+  if(r2Custom.some(x=>x.toLowerCase()===w.toLowerCase())){msg.textContent='這個文字已經新增過了。';return}
+  if(r2Custom.length>=20){msg.textContent='最多新增 20 筆自訂文字。';return}
+  r2Custom.push(w);el.value='';r2RenderSide();
+}
+function r2DelCustom(i){r2Custom.splice(i,1);r2RenderSide()}
+function r2Clear(){
+  if(r2Busy)return;
+  $('r2history').innerHTML='<div class="r2-empty" id="r2empty">系統已準備就緒，請在下方輸入測試訊息開始對話。<br>也可以先到右側新增你自己想保護的文字。</div>';
+}
+r2RenderSide();
 
 // LLM03 供應鏈漏洞 (模擬掃描體驗提升)
 const deps=[['FastAPI','後端 API','0.115.x'],['Ollama','本地模型服務','0.5.x'],['TAIDE','語言模型','依部署版本'],['Vue.js','前端框架','3.x'],['PostgreSQL','資料庫','16.x'],['Python 套件','應用程式相依套件','依 lockfile']];
