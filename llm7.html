@@ -1143,8 +1143,8 @@ function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 // ---------------------------------------------------------
 // API 呼叫共用模組
 // ---------------------------------------------------------
-// 修改後的樣子
-let res = await fetch('http://127.0.0.1:8000/api/chat', {
+async function fetchTAIDE(message) {
+  let res = await fetch('http://127.0.0.1:8000/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: message })
