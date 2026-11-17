@@ -1162,7 +1162,7 @@ async function askKnowledge(){
     let data = await fetchTAIDE(q);
     showResult('knowledgeResult', `<div class="result-head"><span class="status safe">生成完成</span><span>TAIDE + FastAPI</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
   } catch (e) {
-    showResult('knowledgeResult', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 1.py 已啟動。<br>錯誤訊息：${e.message}</div>`);
+    showResult('knowledgeResult', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 FastAPI 已啟動。<br>錯誤訊息：${e.message}</div>`);
   }
 }
 
