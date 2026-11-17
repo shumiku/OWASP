@@ -3,9 +3,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from groq import Groq
+from sqlalchemy import create_engine
 import os
 
 app = FastAPI()
+Database_URL = "postgresql://neondb_owner:npg_3s5OhXbTWgxm@ep-spring-meadow-a1k8kopb-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+engine = create_engine("DATABASE_URL")
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,10 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 class ChatRequest(BaseModel):
     message: str
 
-# 初始化 Groq 客戶端 (請換成你申請的 API Key)
+# 初始化 Groq 客戶端
 client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
 )
