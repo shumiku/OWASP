@@ -1143,15 +1143,32 @@ function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 // ---------------------------------------------------------
 // API 呼叫共用模組
 // ---------------------------------------------------------
+
 async function fetchTAIDE(message) {
-  let res = await fetch('https://owasp-llm.onrender.com/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: message })
+
+  const API_URL = "https://owasp-llm.onrender.com/api/chat";
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: message
+    })
   });
-  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-  return await res.json();
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(
+      data.detail || `HTTP 錯誤：${res.status}`
+    );
+  }
+
+  return data;
 }
+
 
 // 知識檢索與教育中心 (連線)
 async function askKnowledge(){
@@ -1162,8 +1179,16 @@ async function askKnowledge(){
     let data = await fetchTAIDE(q);
     showResult('knowledgeResult', `<div class="result-head"><span class="status safe">生成完成</span><span>TAIDE + FastAPI</span></div><div class="result-body">${escapeHtml(data.reply)}</div>`);
   } catch (e) {
-    showResult('knowledgeResult', `<div class="result-head"><span class="status blocked">連線失敗</span></div><div class="result-body">無法連線至後端。請確認 FastAPI 已啟動。<br>錯誤訊息：${e.message}</div>`);
-  }
+  showResult(
+    'knowledgeResult',
+    `<div class="result-head">
+      <span class="status blocked">連線失敗</span>
+    </div>
+    <div class="result-body">
+      ${escapeHtml(e.message)}
+    </div>`
+  );
+}
 }
 
 // LLM01 提示詞注入：闖關挑戰（無害的展示機器人）
