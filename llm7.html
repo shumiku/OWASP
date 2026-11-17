@@ -1144,7 +1144,7 @@ function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 // API 呼叫共用模組
 // ---------------------------------------------------------
 async function fetchTAIDE(message) {
-  let res = await fetch('http://127.0.0.1:8000/api/chat', {
+  let res = await fetch('https://owasp-llm.onrender.com/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message: message })
