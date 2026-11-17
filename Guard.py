@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -7,8 +6,13 @@ from sqlalchemy import create_engine
 import os
 
 app = FastAPI()
-Database_URL = "postgresql://neondb_owner:npg_3s5OhXbTWgxm@ep-spring-meadow-a1k8kopb-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-engine = create_engine("DATABASE_URL")
+
+# 透過 os.environ.get 安全地抓取環境變數中的資料庫網址
+db_url = os.environ.get("DATABASE_URL")
+if db_url:
+    engine = create_engine(db_url)
+else:
+    print("Warning: DATABASE_URL is not set.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,7 +26,7 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
-# 初始化 Groq 客戶端
+# 初始化 Groq 客戶端，同樣透過環境變數抓取 API Key
 client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
 )
