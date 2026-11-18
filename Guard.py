@@ -121,7 +121,7 @@ def chat_with_ai(req: ChatRequest):
         client = Groq(api_key=api_key)
 
         response = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model="llama3-8b-8192",
             messages=[
                 {
                     "role": "system",
