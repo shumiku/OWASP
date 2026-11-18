@@ -95,12 +95,12 @@ def health():
 @app.post("/api/chat")
 def chat_with_ai(req: ChatRequest):
 
-    api_key = os.environ.get("GROQ_API_KEY")
+    api_key = os.environ.get("LLM_Guard2")
 
     if not api_key:
         raise HTTPException(
             status_code=500,
-            detail="尚未設定 GROQ_API_KEY"
+            detail="尚未設定 LLM_Guard2"
         )
 
     if not req.message.strip():
