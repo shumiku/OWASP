@@ -66,7 +66,7 @@ body{background:linear-gradient(135deg,#f7f9fd,#edf3fb 55%,#f5f8fc);color:var(--
 .footer-note{color:#8796aa}
 </style>
 
-<script>window.LG_AUTH_ON=true;document.documentElement.setAttribute('data-role','guest');</script>
+<script>window.LG_AUTH_ON=true;document.documentElement.setAttribute('data-role','guest');try{var ss=sessionStorage;if(!ss.getItem('llmguard.session')&&ss.getItem('llmguard.entered')!=='1')document.documentElement.classList.add('lp-on')}catch(e){document.documentElement.classList.add('lp-on')}</script>
 </head>
 <body>
 <div class="lg-login" id="lgLogin" role="dialog" aria-modal="true" aria-labelledby="lgTitle">
@@ -110,10 +110,82 @@ body{background:linear-gradient(135deg,#f7f9fd,#edf3fb 55%,#f5f8fc);color:var(--
       <div class="lg-msg" id="lgMsg" role="alert" aria-live="polite"></div>
       <div class="lg-switch" id="lgSwitch">還沒有帳號？<button type="button" data-lgmode="reg">註冊新帳號</button></div>
       <details class="lg-demo" id="lgDemo"><summary>展示用帳號（給老師與評審試用）</summary><div id="lgDemoBody"></div></details>
-      <button type="button" class="lg-guest" data-lgclose="1">先不登入，以訪客身分繼續瀏覽</button>
+      <button type="button" class="lg-guest" data-lgguest="1">先不登入，以訪客身分繼續瀏覽</button>
       <p class="lg-note">帳號與學習進度由後端 FastAPI 驗證並存放在 PostgreSQL；密碼以 PBKDF2 雜湊儲存，連續輸入錯誤會暫時鎖定。</p>
     </section>
   </div>
+</div>
+<div id="landing" role="document">
+<header class="lp-top"><div class="lp-wrap lp-top-in">
+  <a class="lp-brand" href="#" data-lpscroll="lpTop" aria-label="LLM Guard 首頁"><span class="lp-logo">盾</span><span><b>LLM GUARD</b><small>AI SECURITY FRAMEWORK</small></span></a>
+  <nav class="lp-nav" aria-label="首頁導覽"><button type="button" data-lpscroll="lpRoles">怎麼開始</button><button type="button" data-lpscroll="lpTopics">學習內容</button><button type="button" data-lpscroll="lpHow">學習方式</button><button type="button" data-lpscroll="lpFaq">常見問題</button></nav>
+  <div class="lp-top-act"><button type="button" class="lp-btn ghost" data-lplogin="1">登入</button><button type="button" class="lp-btn primary" data-lpstart="1">免費註冊</button></div>
+</div></header>
+
+<section class="lp-hero" id="lpTop"><div class="lp-wrap lp-hero-in">
+  <div class="lp-hero-copy">
+    <span class="lp-badge">OWASP LLM Top 10 2025 · 互動式學習平台</span>
+    <h1>把大型語言模型的資安風險，<em>動手學到會</em></h1>
+    <p>從提示注入到無限制消耗，10 項風險都有白話說明、互動模擬、程式碼找漏洞與情境練習，還有會標示來源的 AI 助教。學生、老師、開發者都能免費使用。</p>
+    <div class="lp-cta"><button type="button" class="lp-btn primary big" data-lpstart="1">開始免費使用 →</button><button type="button" class="lp-btn ghost big" data-lplogin="1">我已有帳號，登入</button></div>
+    <button type="button" class="lp-link" data-lpguest="1">還不想註冊？先逛逛看（訪客體驗）→</button>
+    <ul class="lp-trust"><li>不用下載，手機、平板、電腦打開瀏覽器就能學</li><li>進度、筆記與書籤存在你的帳號，換裝置也能接著學</li></ul>
+  </div>
+  <div class="lp-visual" aria-hidden="true">
+    <div class="lp-card lp-c1"><div class="lp-ring"><b>68%</b></div><div><small>我的學習進度</small><strong>已完成 46 / 68 步</strong><div class="lp-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div></div>
+    <div class="lp-card lp-c2"><div class="lp-tag">🔍 找漏洞</div><code><span>1</span>system = "折扣碼：VIP-8888"</code><code class="hit"><span>2</span>prompt = system + doc + msg</code><code><span>3</span>reply = llm.chat(prompt)</code></div>
+    <div class="lp-card lp-c3"><div class="lp-tag">🤖 AI 助教</div><p>提示注入是把惡意指令藏進輸入，讓模型改聽攻擊者的話 <b>[1]</b></p><span class="lp-src">[1] LLM01 提示注入 · 概要</span></div>
+  </div>
+</div></section>
+
+<section class="lp-stats"><div class="lp-wrap"><div class="lp-stat-grid">
+  <div><b id="lpN1">10</b><span>項 OWASP 風險</span></div>
+  <div><b id="lpN2">31</b><span>個術語白話解釋</span></div>
+  <div><b id="lpN3">30</b><span>個實作挑戰</span></div>
+  <div><b>100%</b><span>免費使用</span></div>
+</div></div></section>
+
+<section class="lp-sec" id="lpRoles"><div class="lp-wrap">
+  <h2>你可以怎麼開始用？</h2><p class="lp-sub">選擇最符合你的身份，看看這個平台能陪你做什麼</p>
+  <div class="lp-tabs" role="tablist"><button type="button" role="tab" class="on" data-lprole="stu" aria-selected="true">🎓 我是學生</button><button type="button" role="tab" data-lprole="tea" aria-selected="false">🧑‍🏫 我是老師</button><button type="button" role="tab" data-lprole="dev" aria-selected="false">💻 我是開發者</button></div>
+  <div class="lp-role on" data-lppanel="stu"><div class="lp-role-t"><small>給學生</small><h3>從零開始，一步步看懂 LLM 資安</h3><ul><li>每個風險都有白話說明與術語表，不怕看不懂專有名詞</li><li>互動模擬加上三種實作挑戰：找程式碼漏洞、判斷情境、自己寫答案讓 AI 評分</li><li>進度、筆記與書籤存在你的帳號，換裝置也能接著學</li></ul><button type="button" class="lp-btn primary" data-lpstart="1">立即開始學習</button></div><div class="lp-role-v">🎓</div></div>
+  <div class="lp-role" data-lppanel="tea"><div class="lp-role-t"><small>給老師</small><h3>掌握每位學員的學習狀況</h3><ul><li>管理者審核中心：一眼看出每位學員的整體學習進度</li><li>新增帳號、重設密碼、清除進度，並發給學員復原碼</li><li>可設定註冊碼，只讓你的學員註冊</li></ul><button type="button" class="lp-btn primary" data-lpadmin="1">以管理者身分登入</button></div><div class="lp-role-v">🧑‍🏫</div></div>
+  <div class="lp-role" data-lppanel="dev"><div class="lp-role-t"><small>給開發者</small><h3>把學到的直接用在自己的專案</h3><ul><li>每個風險附上攻擊情境與防禦策略，可以對照自己的系統</li><li>找漏洞練習使用真實常見的寫法：提示拼接、SQL 注入、權限過大、RAG 沒做權限過濾</li><li>AI 助教依據知識庫回答並標示來源，方便查證</li></ul><button type="button" class="lp-btn primary" data-lpstart="1">開始練習</button></div><div class="lp-role-v">💻</div></div>
+  <p class="lp-note">無論選擇哪個身份，都可以免費使用平台上的學習內容</p>
+</div></section>
+
+<section class="lp-sec alt" id="lpTopics"><div class="lp-wrap">
+  <h2>想學什麼，十大風險都在這裡</h2><p class="lp-sub">每個風險都包含：概述、風險實例、預防與緩解、攻擊情境、框架與來源、動手實作</p>
+  <div class="lp-topics" id="lpTopicGrid"></div>
+</div></section>
+
+<section class="lp-sec" id="lpHow"><div class="lp-wrap">
+  <h2>學習不只是閱讀，而是五個步驟</h2><p class="lp-sub">讀懂、玩過、練習、發問、記下來，每一步都有對應的功能</p>
+  <div class="lp-steps">
+    <div><i>1</i><b>先讀懂</b><span>白話的風險說明，專有名詞點一下就有解釋</span></div>
+    <div><i>2</i><b>動手玩</b><span>在模擬環境裡實際攻擊與開關防禦，看結果怎麼變</span></div>
+    <div><i>3</i><b>多種練習</b><span>程式碼找漏洞、情境判斷，以及由 AI 即時評分的開放式實作</span></div>
+    <div><i>4</i><b>問 AI 助教</b><span>先查知識庫再回答，並標示參考來源，可以自己查證</span></div>
+    <div><i>5</i><b>記下來</b><span>筆記、書籤與學習進度存在帳號，隨時接著學</span></div>
+  </div>
+</div></section>
+
+<section class="lp-sec alt" id="lpFaq"><div class="lp-wrap lp-narrow">
+  <h2>常見問題</h2>
+  <details open><summary>這個平台真的免費嗎？</summary><p>是的，這是一個教學用的專案，學生、老師與開發者都可以免費使用平台上的學習內容與功能。</p></details>
+  <details><summary>不註冊可以用嗎？</summary><p>可以先逛逛：閱讀所有風險內容、操作互動模擬、搜尋知識庫、查看術語表，也能練習找漏洞與情境判斷。註冊登入後才能使用 AI 助教、儲存學習進度、做筆記與書籤。訪客的操作紀錄只會留在目前的頁面，重新整理後就會消失，也不會轉進之後註冊的帳號，建議一開始就註冊。</p></details>
+  <details><summary>忘記密碼怎麼辦？</summary><p>註冊成功時會顯示一組復原碼（只顯示一次，請保存好）。忘記密碼時，在登入頁按「忘記密碼？」，輸入帳號與復原碼就能自己重設。如果沒有復原碼，可以請管理者協助重設。</p></details>
+  <details><summary>需要什麼設備才能使用？</summary><p>電腦、平板、手機都能用，打開瀏覽器就能學，不需要下載 App。建議使用最新版的 Chrome、Edge、Safari 或 Firefox。</p></details>
+  <details><summary>我的資料會存在哪裡？</summary><p>帳號、學習進度與筆記存放在平台後端的 PostgreSQL 資料庫，密碼經過雜湊處理，筆記只有你自己看得到。使用 AI 助教時，你輸入的問題會送到雲端的語言模型處理，所以請不要輸入個資或機密資料。</p></details>
+  <details><summary>學習內容是從哪裡來的？</summary><p>內容整理自 OWASP Top 10 for LLM Applications 2025 繁體中文版，已節錄、改寫並調整為互動格式。這不是 OWASP 官方文件，內容僅供一般參考，不構成法律建議。</p></details>
+</div></section>
+
+<section class="lp-final"><div class="lp-wrap"><h2>準備好一起開始了嗎？</h2><p>學生、老師、開發者都能免費使用，現在就開始。</p><div class="lp-cta c"><button type="button" class="lp-btn primary big" data-lpstart="1">開始免費使用 →</button><button type="button" class="lp-btn ghost big" data-lplogin="1">登入</button></div><button type="button" class="lp-link" data-lpguest="1">先逛逛看（訪客體驗）→</button></div></section>
+
+<footer class="lp-foot"><div class="lp-wrap">
+  <div class="lp-foot-brand"><span class="lp-logo">盾</span><b>LLM GUARD</b></div>
+  <p>內容整理自 <a href="https://genai.owasp.org" target="_blank" rel="noopener">OWASP Top 10 for LLM Applications 2025</a> 繁體中文版，依 <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode" target="_blank" rel="noopener">CC BY-SA 4.0</a> 授權；已節錄、改寫並調整為互動格式，並非 OWASP 官方文件。僅供一般參考，不構成法律建議。</p>
+</div></footer>
 </div>
 <div class="layout">
 <aside class="sidebar">
@@ -3314,7 +3386,7 @@ async function lgReset(user,code,pass,pass2){
 function lgSession(){try{const s=JSON.parse(window.sessionStorage.getItem(LG_SES)||"null");return s&&s.user&&s.role?s:null}catch(e){return null}}
 function lgIs(role){const s=lgSession();return !!s&&s.role===role}
 function lgReload(){window.location.reload()}
-async function lgLogout(){try{await eduFlush()}catch(e){}try{await ntFlush()}catch(e){}try{await lgApi("POST","/api/auth/logout")}catch(e){}try{window.sessionStorage.removeItem(LG_SES)}catch(e){}lgReload()}
+async function lgLogout(){try{await eduFlush()}catch(e){}try{await ntFlush()}catch(e){}try{await lgApi("POST","/api/auth/logout")}catch(e){}try{window.sessionStorage.removeItem(LG_SES);window.sessionStorage.removeItem("llmguard.entered")}catch(e){}lgReload()}
 function lgToast(msg,type){
   let el=document.getElementById("lgToast");
   if(!el){document.body.insertAdjacentHTML("beforeend",'<div class="lg-toast" id="lgToast" role="status" aria-live="polite"></div>');el=document.getElementById("lgToast")}
@@ -3353,17 +3425,17 @@ function lgOpen(reason,mode){
   if(typeof glHide==="function")glHide();
   try{const c=document.getElementById("gdCoach");if(c&&!c.hidden&&typeof gdClose==="function")gdClose()}catch(e){}   // 操作說明視窗先收起來，避免它攔截 Esc 鍵
   const root=document.documentElement,lay=document.querySelector(".layout");
-  root.classList.add("lg-open");if(lay&&lay.setAttribute)lay.setAttribute("inert","");
+  root.classList.add("lg-open");if(lay&&lay.setAttribute)lay.setAttribute("inert","");const lp0=document.getElementById("landing");if(lp0)lp0.setAttribute("inert","");
   const r=document.getElementById("lgReason");if(r){r.textContent=reason?("🔒 "+reason):"";r.hidden=!reason}
   lgSetRole("user");if(mode==="reg")lgSetMode("reg");lgMsg("");lgLoadCfg();
   setTimeout(function(){const i=document.getElementById("lgUserIn");if(i&&i.focus)i.focus()},80);
 }
 function lgClose(){
   const root=document.documentElement,lay=document.querySelector(".layout");
-  root.classList.remove("lg-open");if(lay&&lay.removeAttribute)lay.removeAttribute("inert");
+  root.classList.remove("lg-open");if(lay&&lay.removeAttribute)lay.removeAttribute("inert");const lp0=document.getElementById("landing");if(lp0)lp0.removeAttribute("inert");
 }
 function lgApply(s,fresh){
-  const root=document.documentElement;root.classList.remove("lg-open");root.setAttribute("data-role",s.role);
+  const root=document.documentElement;root.classList.remove("lg-open","lp-on");root.setAttribute("data-role",s.role);
   const gb=document.getElementById("lgGuestBar");if(gb&&gb.remove)gb.remove();
   const lay=document.querySelector(".layout");if(lay&&lay.removeAttribute)lay.removeAttribute("inert");
   lgChip(s);
@@ -4724,6 +4796,164 @@ document.addEventListener("click",function(e){
   e.preventDefault();
   const el=document.getElementById("kqs"+x.getAttribute("data-kqcite"));
   if(el){el.scrollIntoView({behavior:"smooth",block:"center"});el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash")}
+});
+</script>
+<style id="lpStyle">
+/* ===== 登入前的首頁（Landing）===== */
+#landing{display:none;background:linear-gradient(180deg,#f3f6ff 0,#fff 520px);color:#1f2a4d;min-height:100vh}
+html.lp-on #landing{display:block}
+html.lp-on .layout,html.lp-on .gd-fab,html.lp-on .gd-coach{display:none!important}
+html.lp-on body{background:#f3f6ff}
+#landing *{box-sizing:border-box}
+:where(#landing) :is(h1,h2,h3,p){margin:0}
+.lp-wrap{width:min(1120px,100%);margin:0 auto;padding:0 24px}
+.lp-narrow{width:min(820px,100%)}
+.lp-top{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);border-bottom:1px solid #e6ebfb}
+.lp-top-in{display:flex;align-items:center;gap:20px;height:68px}
+.lp-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:none}
+.lp-brand b{display:block;font-size:15px;letter-spacing:.04em}
+.lp-brand small{display:block;font-size:10px;letter-spacing:.14em;color:#7b86ad}
+.lp-logo{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#ff7d6b,#ffc065 55%,#4fc3a1);color:#fff;font-weight:800;font-size:18px}
+.lp-nav{display:flex;gap:4px;margin-left:12px;flex:1}
+.lp-nav button{border:0;background:transparent;font:inherit;font-size:14px;font-weight:700;color:#4a5683;padding:8px 12px;border-radius:999px;cursor:pointer}
+.lp-nav button:hover{background:#eef1ff;color:#2f3fcb}
+.lp-top-act{display:flex;gap:8px;margin-left:auto}
+.lp-btn{font:inherit;font-weight:800;font-size:14px;border-radius:999px;padding:10px 20px;cursor:pointer;border:1.5px solid transparent;min-height:42px;white-space:nowrap}
+.lp-btn.primary{background:linear-gradient(110deg,#5b6dff,#1fa7e8);color:#fff;box-shadow:0 14px 28px -14px rgba(60,90,255,.7)}
+.lp-btn.primary:hover{filter:brightness(1.06)}
+.lp-btn.ghost{background:#fff;color:#33407a;border-color:#d8def6}
+.lp-btn.ghost:hover{background:#f1f4ff}
+.lp-btn.big{padding:14px 28px;font-size:16px;min-height:52px}
+.lp-link{border:0;background:transparent;font:inherit;font-size:14px;font-weight:700;color:#4d5fe0;cursor:pointer;padding:10px 0;text-align:left}
+.lp-link:hover{text-decoration:underline}
+.lp-hero{padding:56px 0 40px}
+.lp-hero-in{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.lp-badge{display:inline-block;padding:7px 16px;border-radius:999px;background:#e8ecff;color:#3d4fd8;font-size:12.5px;font-weight:800;margin-bottom:18px}
+.lp-hero h1{font-size:clamp(30px,4.4vw,50px);line-height:1.25;letter-spacing:-.01em}
+.lp-hero h1 em{font-style:normal;background:linear-gradient(110deg,#5b6dff,#17a2e6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lp-hero p{margin-top:18px;font-size:16.5px;line-height:1.85;color:#4a5683;max-width:34em}
+.lp-cta{display:flex;gap:12px;flex-wrap:wrap;margin:26px 0 8px}
+.lp-cta.c{justify-content:center}
+.lp-trust{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.lp-trust li{font-size:13.5px;color:#5b6690;padding-left:22px;position:relative}
+.lp-trust li:before{content:"✓";position:absolute;left:0;color:#1fa971;font-weight:800}
+.lp-visual{position:relative;min-height:380px}
+.lp-card{position:absolute;background:#fff;border:1.5px solid #e4e9fb;border-radius:22px;box-shadow:0 30px 60px -28px rgba(50,70,170,.45);padding:16px 18px}
+.lp-c1{top:0;left:6%;display:flex;gap:16px;align-items:center;width:78%}
+.lp-ring{width:76px;height:76px;border-radius:50%;background:conic-gradient(#5b6dff 0 68%,#e7ebfb 0);display:grid;place-items:center;flex:none;position:relative}
+.lp-ring:before{content:"";position:absolute;inset:9px;background:#fff;border-radius:50%}
+.lp-ring b{position:relative;font-size:18px}
+.lp-c1 small{display:block;color:#7b86ad;font-size:12px}
+.lp-c1 strong{display:block;font-size:15px;margin:2px 0 8px}
+.lp-dots{display:flex;gap:6px}.lp-dots i{width:10px;height:10px;border-radius:50%;background:#e1e6fa}.lp-dots i.on{background:#5b6dff}
+.lp-c2{top:122px;right:0;width:84%;display:grid;gap:4px}
+.lp-tag{font-size:12px;font-weight:800;color:#3d4fd8;margin-bottom:4px}
+.lp-c2 code{display:block;font:12.5px/1.7 ui-monospace,Menlo,Consolas,monospace;padding:3px 8px;border-radius:8px;color:#2a3560;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp-c2 code span{color:#9aa3c7;margin-right:10px}
+.lp-c2 code.hit{background:#ffe8ec;box-shadow:inset 3px 0 0 #e11d48}
+.lp-c3{bottom:0;left:0;width:86%}
+.lp-c3 p{font-size:13.5px;line-height:1.75;color:#33407a}
+.lp-c3 p b{color:#4d5fe0}
+.lp-src{display:inline-block;margin-top:8px;padding:3px 10px;border-radius:999px;background:#eef1ff;color:#4a5683;font-size:11.5px;font-weight:700}
+.lp-stats{padding:8px 0 24px}
+.lp-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;background:#fff;border:1.5px solid #e4e9fb;border-radius:26px;padding:22px 26px;box-shadow:0 24px 50px -34px rgba(50,70,170,.4)}
+.lp-stat-grid div{text-align:center}
+.lp-stat-grid b{display:block;font-size:34px;background:linear-gradient(110deg,#5b6dff,#17a2e6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lp-stat-grid span{font-size:13.5px;color:#5b6690;font-weight:700}
+.lp-sec{padding:64px 0}
+.lp-sec.alt{background:#f5f7ff}
+.lp-sec h2,.lp-final h2{text-align:center;font-size:clamp(24px,3.2vw,34px);line-height:1.35}
+.lp-sub{text-align:center;color:#5b6690;margin-top:10px;font-size:15px;line-height:1.7}
+#lpRoles,#lpTopics,#lpHow,#lpFaq,#lpTop{scroll-margin-top:74px}
+.lp-tabs{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:28px 0 20px}
+.lp-tabs button{font:inherit;font-weight:800;font-size:15px;border:1.5px solid #d8def6;background:#fff;color:#4a5683;border-radius:999px;padding:11px 22px;cursor:pointer;min-height:46px}
+.lp-tabs button.on{background:linear-gradient(110deg,#5b6dff,#1fa7e8);color:#fff;border-color:transparent;box-shadow:0 14px 28px -16px rgba(60,90,255,.7)}
+.lp-role{display:none;grid-template-columns:1.3fr .7fr;gap:30px;align-items:center;background:#fff;border:1.5px solid #e4e9fb;border-radius:28px;padding:34px 38px;box-shadow:0 30px 60px -40px rgba(50,70,170,.45)}
+.lp-role.on{display:grid}
+.lp-role-t small{color:#4d5fe0;font-weight:800;font-size:13px}
+.lp-role-t h3{font-size:24px;margin:6px 0 14px;line-height:1.4}
+.lp-role-t ul{margin:0 0 22px;padding:0;list-style:none;display:grid;gap:10px}
+.lp-role-t li{position:relative;padding-left:22px;line-height:1.75;font-size:15px;color:#3c4772}
+.lp-role-t li:before{content:"";position:absolute;left:0;top:.7em;width:9px;height:9px;border-radius:50%;background:linear-gradient(110deg,#5b6dff,#1fa7e8)}
+.lp-role-v{display:grid;place-items:center;font-size:96px;height:100%;min-height:180px;border-radius:24px;background:linear-gradient(135deg,#eef1ff,#e3f4ff)}
+.lp-note{text-align:center;color:#7b86ad;font-size:13px;margin-top:16px}
+.lp-topics{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:30px}
+.lp-topic{background:#fff;border:1.5px solid #e4e9fb;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:8px;transition:transform .15s,box-shadow .15s}
+.lp-topic:hover{transform:translateY(-3px);box-shadow:0 22px 40px -26px rgba(50,70,170,.55)}
+.lp-topic .c{align-self:flex-start;padding:4px 12px;border-radius:999px;color:#fff;font-weight:800;font-size:12px}
+.lp-topic b{font-size:15px;line-height:1.45}
+.lp-topic small{color:#6a759c;font-size:12px;line-height:1.55}
+.lp-topic span{color:#5b6690;font-size:12.5px;line-height:1.7}
+.lp-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:32px}
+.lp-steps div{background:#fff;border:1.5px solid #e4e9fb;border-radius:22px;padding:20px 16px;display:flex;flex-direction:column;gap:8px}
+.lp-steps i{font-style:normal;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(110deg,#5b6dff,#1fa7e8);color:#fff;font-weight:800}
+.lp-steps b{font-size:16px}
+.lp-steps span{font-size:13px;line-height:1.7;color:#5b6690}
+.lp-narrow h2{margin-bottom:24px}
+.lp-narrow details{background:#fff;border:1.5px solid #e4e9fb;border-radius:18px;padding:4px 20px;margin:10px 0}
+.lp-narrow summary{cursor:pointer;font-weight:800;font-size:15.5px;padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.lp-narrow summary::-webkit-details-marker{display:none}
+.lp-narrow summary:after{content:"＋";color:#4d5fe0;font-weight:800}
+.lp-narrow details[open] summary:after{content:"－"}
+.lp-narrow details p{padding:0 0 16px;line-height:1.85;color:#4a5683;font-size:14.5px}
+.lp-final{padding:70px 0;text-align:center;background:linear-gradient(120deg,#e8ecff,#dff3ff)}
+.lp-final p{margin:10px 0 22px;color:#4a5683}
+.lp-final .lp-link{text-align:center}
+.lp-foot{padding:34px 0 44px;background:#fff;border-top:1px solid #e6ebfb}
+.lp-foot-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lp-foot p{font-size:12.5px;line-height:1.85;color:#6a759c}
+.lp-foot a{color:#3d4fd8;font-weight:700}
+@media (max-width:960px){.lp-topics{grid-template-columns:repeat(3,1fr)}.lp-steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){
+  .lp-wrap{padding:0 16px}
+  .lp-nav{display:none}
+  .lp-top-in{height:60px}
+  .lp-brand small{display:none}
+  .lp-top-act .lp-btn{padding:8px 14px;font-size:13px;min-height:38px}
+  .lp-hero{padding:30px 0 24px}
+  .lp-hero-in{grid-template-columns:1fr;gap:26px}
+  .lp-hero p{font-size:15px}
+  .lp-cta .lp-btn{flex:1 1 100%}
+  .lp-visual{min-height:0;display:grid;gap:12px}
+  .lp-card{position:static;width:100%!important}
+  .lp-stat-grid{grid-template-columns:repeat(2,1fr);padding:18px}
+  .lp-sec{padding:44px 0}
+  .lp-role{grid-template-columns:1fr;padding:22px 20px}
+  .lp-role-v{display:none}
+  .lp-topics{grid-template-columns:repeat(2,1fr)}
+  .lp-steps{grid-template-columns:1fr}
+  .lp-tabs button{flex:1 1 auto;padding:10px 12px;font-size:14px}
+}
+</style>
+<script>
+/* ===== 登入前首頁（Landing）===== */
+(function(){
+  const set=function(id,v){const e=document.getElementById(id);if(e)e.textContent=v};
+  set("lpN1",KB.length);set("lpN2",GLOSSARY.length);set("lpN3",KB.length*3);
+  const g=document.getElementById("lpTopicGrid");
+  if(g)g.innerHTML=KB.map(function(k){
+    const a=KB_ACC[k.n-1];
+    return'<div class="lp-topic"><span class="c" style="background:linear-gradient(110deg,'+a[0]+','+a[1]+')">'+escapeHtml(k.code)+'</span><b>'+escapeHtml(k.zh)+'</b><small>'+escapeHtml(k.en)+'</small><span>'+escapeHtml(k.sum)+'</span></div>';
+  }).join("");
+})();
+function lpEnterGuest(){
+  try{window.sessionStorage.setItem("llmguard.entered","1")}catch(e){}
+  document.documentElement.classList.remove("lp-on");
+  window.scrollTo(0,0);if(typeof go==="function")go("home");
+}
+document.addEventListener("click",function(e){
+  const c=function(s){return e.target.closest&&e.target.closest(s)};let x;
+  if(c("[data-lpstart]")){lgOpen("","reg");return}
+  if(c("[data-lplogin]")){lgOpen();return}
+  if(c("[data-lpadmin]")){lgOpen();lgSetRole("admin");return}
+  if(c("[data-lpguest]")){lpEnterGuest();return}
+  if(c("[data-lgguest]")){lgClose();if(document.documentElement.classList.contains("lp-on"))lpEnterGuest();return}
+  if((x=c("[data-lpscroll]"))){e.preventDefault();const el=document.getElementById(x.getAttribute("data-lpscroll"));if(el)el.scrollIntoView({behavior:"smooth",block:"start"});return}
+  if((x=c("[data-lprole]"))){
+    const r=x.getAttribute("data-lprole");
+    document.querySelectorAll("[data-lprole]").forEach(function(b){const on=b.getAttribute("data-lprole")===r;b.classList.toggle("on",on);b.setAttribute("aria-selected",String(on))});
+    document.querySelectorAll("[data-lppanel]").forEach(function(p){p.classList.toggle("on",p.getAttribute("data-lppanel")===r)});
+  }
 });
 </script>
 </body>
